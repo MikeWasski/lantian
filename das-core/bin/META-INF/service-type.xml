@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<serviceTypes>
+	<!-- 风廓线雷达数据 -->
+	<serviceType>
+		<code>WindLidarDataAccessType</code>
+		<name>风廓线雷达监视器类型</name>
+		<class>com.cas.das.core.service.type.WindLidarDataAccessType</class>
+
+		<paramDefs>
+			<paramDef>
+				<code>monitorDir</code>
+				<name>监视文件目录</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>250</width>
+			</paramDef>
+			<paramDef>
+				<code>jsonDir</code>
+				<name>生成文件目录</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>250</width>
+			</paramDef>
+			<paramDef>
+				<code>intervalTime</code>
+				<name>间隔时间（秒）</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+		</paramDefs>
+	</serviceType>
+	
+	<!-- mina客户端 -->
+	<serviceType>
+		<code>FTPClientImportType</code>
+		<name>mina客户端</name>
+		<class>com.cas.das.core.service.type.FTPClientImportType</class>
+		
+		<paramDefs>
+			<paramDef>
+				<code>siteCode</code>
+				<name>子站编号</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>250</width>
+			</paramDef>
+			<paramDef>
+				<code>monitorMap</code>
+				<name>监视文件目录</name>
+				<class>com.cas.platform.service.def.param.MappingParamDefinition</class>
+				<width>250</width>
+			</paramDef>
+			<paramDef>
+				<code>intervalTime</code>
+				<name>间隔时间（秒）</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+		</paramDefs>
+	</serviceType>
+	
+	<!-- 接入FTP数据并插入数据库 -->
+	<serviceType>
+		<code>FTPDataImportType</code>
+		<name>FTP数据导入类型</name>
+		<class>com.cas.das.core.service.type.FTPDataImportType</class>
+	</serviceType>
+	
+	<!-- 共享目录导入类型 -->
+	<serviceType>
+		<code>HighEnergyRadarDataAccessType</code>
+		<name>共享目录导入类型</name>
+		<class>com.cas.das.core.service.type.SharedFileImportType</class>
+
+		<paramDefs>
+			<paramDef>
+				<code>monitorDir</code>
+				<name>监视文件目录</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>250</width>
+			</paramDef>
+			<paramDef>
+				<code>intervalTime</code>
+				<name>间隔时间（秒）</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+		</paramDefs>
+	</serviceType>
+	
+	<!-- 接入高能雷达数据 -->
+	<serviceType>
+		<code>LidarDataAccessType</code>
+		<name>文件目录监视器类型</name>
+		<class>com.cas.das.core.service.type.LidarDataAccessType</class>
+
+		<paramDefs>
+			<paramDef>
+				<code>monitorDir</code>
+				<name>监视文件目录</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>250</width>
+			</paramDef>
+			<paramDef>
+				<code>intervalTime</code>
+				<name>间隔时间（秒）</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+		</paramDefs>
+	</serviceType>
+
+	<!-- 定时调用并插入数据库 -->
+	<serviceType>
+		<code>TimedCallAndImportDataAccessType</code>
+		<name>定时调用并插入数据库</name>
+		<class>com.cas.das.core.service.type.TimedCallAndImportDataAccessType</class>
+
+		<paramDefs>
+			<paramDef>
+				<code>intervalTime</code>
+				<name>间隔时间（秒）</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+		</paramDefs>
+	</serviceType>
+
+	<!-- 江苏省气象局，接入高能雷达数据 -->
+	<serviceType>
+		<code>JsLidarDataAccessType</code>
+		<name>江苏省气象局高能雷达数据接入类型</name>
+		<class>com.cas.das.core.service.type.JsLidarDataAccessType</class>
+
+		<paramDefs>
+			<paramDef>
+				<code>monitorDir</code>
+				<name>监视文件目录</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>250</width>
+			</paramDef>
+			<paramDef>
+				<code>intervalTime</code>
+				<name>间隔时间（秒）</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+		</paramDefs>
+	</serviceType>
+
+	<!-- 高能雷达状态数据接入 -->
+	<serviceType>
+		<code>LidarStatusDataAccessType</code>
+		<name>高能雷达状态数据接入类型</name>
+		<class>com.cas.das.core.service.type.LidarStatusDataAccessType</class>
+
+		<paramDefs>
+			<paramDef>
+				<code>monitorDir</code>
+				<name>监视文件目录</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>250</width>
+			</paramDef>
+			<paramDef>
+				<code>intervalTime</code>
+				<name>间隔时间（秒）</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+		</paramDefs>
+	</serviceType>
+
+</serviceTypes>

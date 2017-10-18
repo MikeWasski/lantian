@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<serviceProcessors>
+	<!-- 风廓线雷达状态数据解析 -->
+	<serviceProcessor>
+		<code>WindLidarDataProcessor</code>
+		<name>风廓线雷达数据解析</name>
+		<class>com.cas.das.core.service.processor.WindLidarDataProcessor</class>
+
+		<innerParamDefs>
+			<paramDef>
+				<code>driverClass</code>
+				<name>数据库驱动程序</name>
+				<class>com.cas.platform.service.def.param.SelectParamDefinition</class>
+				<width>252</width>
+				<options>
+					<option name="Microsoft SQL Server 2008" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+				</options>
+			</paramDef>
+			<paramDef>
+				<code>url</code>
+				<name>数据库连接URL</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>250</width>
+			</paramDef>
+			<paramDef>
+				<code>user</code>
+				<name>用户名</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+			<paramDef>
+				<code>password</code>
+				<name>连接密码</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+		</innerParamDefs>
+
+		<outerParamDefs>
+			<paramDef>
+				<code>siteId</code>
+				<name>站点ID</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+			<paramDef>
+				<code>tableName</code>
+				<name>数据库表名</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+		</outerParamDefs>
+	</serviceProcessor>
+
+	<!-- mina客户端 -->
+	<serviceProcessor>
+		<code>FTPClientImportProcessor</code>
+		<name>mina客户端</name>
+		<class>com.cas.das.core.service.processor.FTPClientImportProcessor</class>
+		
+		<innerParamDefs>
+			<paramDef>
+				<code>driverClass</code>
+				<name>数据库驱动程序</name>
+				<class>com.cas.platform.service.def.param.SelectParamDefinition</class>
+				<width>252</width>
+				<options>
+					<option name="Microsoft SQL Server 2008" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+				</options>
+			</paramDef>
+			<paramDef>
+				<code>url</code>
+				<name>数据库连接URL</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>250</width>
+			</paramDef>
+			<paramDef>
+				<code>user</code>
+				<name>用户名</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+			<paramDef>
+				<code>password</code>
+				<name>连接密码</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+		</innerParamDefs>
+	</serviceProcessor>
+	
+	<!-- FTP数据解析 -->
+	<serviceProcessor>
+		<code>FTPDataImportProcessor</code>
+		<name>FTP数据解析</name>
+		<class>com.cas.das.core.service.processor.FTPDataImportProcessor</class>
+		
+		<innerParamDefs>
+			<paramDef>
+				<code>driverClass</code>
+				<name>数据库驱动程序</name>
+				<class>com.cas.platform.service.def.param.SelectParamDefinition</class>
+				<width>252</width>
+				<options>
+					<option name="Microsoft SQL Server 2008" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+				</options>
+			</paramDef>
+			<paramDef>
+				<code>url</code>
+				<name>数据库连接URL</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>250</width>
+			</paramDef>
+			<paramDef>
+				<code>user</code>
+				<name>用户名</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+			<paramDef>
+				<code>password</code>
+				<name>连接密码</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+		</innerParamDefs>
+	</serviceProcessor>
+	
+	<!-- 共享目录高能雷达数据 -->
+	<serviceProcessor>
+		<code>HighEnergyRadarDataProcessor</code>
+		<name>共享目录数据解析</name>
+		<class>com.cas.das.core.service.processor.SharedFileImportProcessor</class>
+
+		<outerParamDefs>
+			<paramDef>
+				<code>startTime</code>
+				<name>开始导入时间</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+			<paramDef>
+				<code>siteRecordCode</code>
+				<name>站点导入标识</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+			<paramDef>
+				<code>importPath</code>
+				<name>文件存放路径</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+		</outerParamDefs>
+	</serviceProcessor>
+	
+	<!-- 雷达状态数据解析 -->
+	<serviceProcessor>
+		<code>LidarDataProcessor</code>
+		<name>高能雷达数据解析</name>
+		<class>com.cas.das.core.service.processor.LidarDataProcessor</class>
+
+		<innerParamDefs>
+			<paramDef>
+				<code>driverClass</code>
+				<name>数据库驱动程序</name>
+				<class>com.cas.platform.service.def.param.SelectParamDefinition</class>
+				<width>252</width>
+				<options>
+					<option name="Microsoft SQL Server 2008" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+				</options>
+			</paramDef>
+			<paramDef>
+				<code>url</code>
+				<name>数据库连接URL</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>250</width>
+			</paramDef>
+			<paramDef>
+				<code>user</code>
+				<name>用户名</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+			<paramDef>
+				<code>password</code>
+				<name>连接密码</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+		</innerParamDefs>
+
+		<outerParamDefs>
+			<paramDef>
+				<code>siteId</code>
+				<name>siteId</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+		</outerParamDefs>
+	</serviceProcessor>
+
+	<!-- 抓取指定城市的常规数据 -->
+	<serviceProcessor>
+		<code>SpriderNormalDataByCityProcessor</code>
+		<name>网络抓取城市常规数据并插入数据库</name>
+		<class>com.cas.das.core.service.processor.SpriderNormalDataByCityProcessor</class>
+
+		<innerParamDefs>
+			<paramDef>
+				<code>driverClass</code>
+				<name>数据库驱动程序</name>
+				<class>com.cas.platform.service.def.param.SelectParamDefinition</class>
+				<width>252</width>
+				<options>
+					<option name="Microsoft SQL Server 2008" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+				</options>
+			</paramDef>
+			<paramDef>
+				<code>url</code>
+				<name>数据库连接URL</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>250</width>
+			</paramDef>
+			<paramDef>
+				<code>user</code>
+				<name>用户名</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+			<paramDef>
+				<code>password</code>
+				<name>连接密码</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+		</innerParamDefs>
+
+		<outerParamDefs>
+			<paramDef>
+				<code>cityName</code>
+				<name>查询的城市名称</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+			<paramDef>
+				<code>startTime</code>
+				<name>开始时间（yyyy-MM-dd HH:00:00）</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+			<paramDef>
+				<code>tableName</code>
+				<name>插入表名</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+			<paramDef>
+				<code>siteId</code>
+				<name>siteId</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+		</outerParamDefs>
+	</serviceProcessor>
+
+	<!-- 江苏省气象局，接入高能雷达数据 -->
+	<serviceProcessor>
+		<code>JsLidarDataProcessor</code>
+		<name>江苏省气象局高能雷达数据接入处理器</name>
+		<class>com.cas.das.core.service.processor.JsLidarDataProcessor</class>
+
+		<innerParamDefs>
+			<paramDef>
+				<code>driverClass</code>
+				<name>数据库驱动程序</name>
+				<class>com.cas.platform.service.def.param.SelectParamDefinition</class>
+				<width>252</width>
+				<options>
+					<option name="Microsoft SQL Server 2008" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+				</options>
+			</paramDef>
+			<paramDef>
+				<code>url</code>
+				<name>数据库连接URL</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>250</width>
+			</paramDef>
+			<paramDef>
+				<code>user</code>
+				<name>用户名</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+			<paramDef>
+				<code>password</code>
+				<name>连接密码</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+		</innerParamDefs>
+
+		<outerParamDefs>
+			<paramDef>
+				<code>siteId</code>
+				<name>siteId</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+			<paramDef>
+				<code>siteRecordCode</code>
+				<name>记录文件标识</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+		</outerParamDefs>
+	</serviceProcessor>
+
+	<!-- 网络抓取全国城市常规数据并插入数据库 -->
+	<serviceProcessor>
+		<code>SpriderNormalDataOfCountryProcessor</code>
+		<name>网络抓取全国城市常规数据并插入数据库</name>
+		<class>com.cas.das.core.service.processor.SpriderNormalDataOfCountryProcessor</class>
+		
+		<innerParamDefs>
+			<paramDef>
+				<code>driverClass</code>
+				<name>数据库驱动程序</name>
+				<class>com.cas.platform.service.def.param.SelectParamDefinition</class>
+				<width>252</width>
+				<options>
+					<option name="Microsoft SQL Server 2008" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+				</options>
+			</paramDef>
+			<paramDef>
+				<code>url</code>
+				<name>数据库连接URL</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>250</width>
+			</paramDef>
+			<paramDef>
+				<code>user</code>
+				<name>用户名</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+			<paramDef>
+				<code>password</code>
+				<name>连接密码</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+			<paramDef>
+				<code>method</code>
+				<name>数据源</name>
+				<class>com.cas.platform.service.def.param.SelectParamDefinition</class>
+				<width>252</width>
+				<options>
+					<option name="www.aqistudy.cn" value="spriderCountryData" />
+					<option name="www.zq12369.com(invalid)" value="spriderRequest" />
+				</options>
+			</paramDef>
+		</innerParamDefs>
+	</serviceProcessor>
+
+	<!-- 雷达状态数据解析 -->
+	<serviceProcessor>
+		<code>LidarStatusDataProcessor</code>
+		<name>雷达状态数据解析</name>
+		<class>com.cas.das.core.service.processor.LidarStatusDataProcessor</class>
+
+		<innerParamDefs>
+			<paramDef>
+				<code>driverClass</code>
+				<name>数据库驱动程序</name>
+				<class>com.cas.platform.service.def.param.SelectParamDefinition</class>
+				<width>252</width>
+				<options>
+					<option name="Microsoft SQL Server 2008" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+				</options>
+			</paramDef>
+			<paramDef>
+				<code>url</code>
+				<name>数据库连接URL</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>250</width>
+			</paramDef>
+			<paramDef>
+				<code>user</code>
+				<name>用户名</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+			<paramDef>
+				<code>password</code>
+				<name>连接密码</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+		</innerParamDefs>
+
+		<outerParamDefs>
+			<paramDef>
+				<code>siteId</code>
+				<name>siteId</name>
+				<class>com.cas.platform.service.def.param.TextInputParamDefinition</class>
+				<width>150</width>
+			</paramDef>
+		</outerParamDefs>
+	</serviceProcessor>
+
+</serviceProcessors>

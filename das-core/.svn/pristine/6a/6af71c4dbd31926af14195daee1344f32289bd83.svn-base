@@ -1,0 +1,147 @@
+package com.cas.das.core.util;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+/**
+ * 文件工具类，用于读取文件内容、复制文件到指定位置，删除文件的等操作
+ * */
+
+public class DocumentProcessing {
+
+	public static void main(String[] args) {
+	}
+	
+	/**
+	 * 读取指定文件夹下的文件，返回一个map<文件名,文件内容>
+	 * */
+	public static Map<String, String> readFile(String path) {
+		// 读取文件根目录
+		File root = new File(path);
+		Map<String, String> map = new LinkedHashMap<>();
+		if (root.isDirectory()) {
+			File[] files = root.listFiles();
+			// 遍历文件夹内所有文件
+			for (File file : files) {
+				if (file.isFile()) {
+					FileInputStream in = null;
+					InputStreamReader read = null;
+					BufferedReader bread = null;
+					try {
+						// 读取文件内容
+						in = new FileInputStream(file);
+						read = new InputStreamReader(in);
+						bread = new BufferedReader(read);
+						String str = null;
+						while ((str = bread.readLine()) != null) {
+							map.put(file.getName(), str);
+							// 读取后移动文件至指定路径
+							// moveFile(file);
+
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					} finally {
+						clossAll(in, read, bread);
+						if (file.getName().startsWith("JC0")) {
+							// 读取后移动文件至指定路径
+							moveFile(file);
+							deleteFile(file);
+						}
+					}
+				}
+			}
+			// 删除原文件
+			// deleteFiles(files);
+		}
+		return map;
+	}
+	
+	/**
+	 * 按照文件年月日信息复制文件到指定路径
+	 * */
+	public static void moveFile(File file) {
+		String filename = file.getName();
+		String datestring = filename.split("-")[1];
+		SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
+		Date date = null;
+		try {
+			date = format.parse(datestring);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		String year = "" + calendar.get(Calendar.YEAR);
+		String month = "" + calendar.get(Calendar.MONTH);
+		String day = "" + (calendar.get(Calendar.DAY_OF_MONTH) + 1);
+		// 创建要移动到的文件目录
+		File newpath = new File(file.getParent() + "/" + filename.split("-")[0]
+				+ "-" + year + "/" + month + "/" + day);
+		// 如果路径不存在则创建
+		if (!newpath.exists()) {
+			newpath.mkdirs();
+		}
+		RecordFileUtils.copyTo(file.getPath(), file.getParent() + "/"
+				+ filename.split("-")[0] + "-" + year + "/" + month + "/" + day
+				+ "/" + filename);
+	}
+	
+	/**
+	 * 删除文件
+	 * */
+	public static String deleteFiles(File[] files) {
+		String resulr = null;
+		for (File file : files) {
+			if (!file.delete()) {
+				resulr += file.getName() + " ";
+			}
+		}
+		return resulr;
+	}
+
+	/**
+	 * 删除文件
+	 * */
+	public static String deleteFile(File file) {
+		String resulr = null;
+		if (!file.delete()) {
+			resulr = file.getName() + " ";
+		}
+		return resulr;
+	}
+	
+	// 关闭系统资源
+	private static void clossAll(FileInputStream in, InputStreamReader read, BufferedReader bread) {
+		if (null != in) {
+			try {
+				in.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		if (null != read) {
+			try {
+				read.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		if (null != bread) {
+			try {
+				bread.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+}

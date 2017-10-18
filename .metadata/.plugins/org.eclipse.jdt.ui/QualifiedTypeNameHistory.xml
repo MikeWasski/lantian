@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="com.cas.das.core.DasServiceContext"/>
+<fullyQualifiedTypeName name="com.cas.das.core.base.BaseController"/>
+<fullyQualifiedTypeName name="org.apache.mina.core.RuntimeIoException"/>
+<fullyQualifiedTypeName name="com.cas.das.core.entity.HeartBeatHandler"/>
+<fullyQualifiedTypeName name="org.apache.mina.core.service.IoServiceListener"/>
+<fullyQualifiedTypeName name="org.apache.mina.core.future.ConnectFuture"/>
+<fullyQualifiedTypeName name="java.net.InetSocketAddress"/>
+<fullyQualifiedTypeName name="com.cas.das.core.entity.HeartBeatListener"/>
+<fullyQualifiedTypeName name="com.cas.das.core.util.CodeCheckUtil"/>
+<fullyQualifiedTypeName name="java.lang.Appendable"/>
+<fullyQualifiedTypeName name="java.util.List"/>
+<fullyQualifiedTypeName name="net.jlrnt.dbc.DataMap"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="java.util.Date"/>
+<fullyQualifiedTypeName name="com.cas.das.core.entity.DataReconciliationProtocol"/>
+<fullyQualifiedTypeName name="java.lang.Thread"/>
+<fullyQualifiedTypeName name="java.net.URL"/>
+<fullyQualifiedTypeName name="java.io.InputStream"/>
+<fullyQualifiedTypeName name="java.net.MalformedURLException"/>
+<fullyQualifiedTypeName name="java.io.IOException"/>
+<fullyQualifiedTypeName name="java.util.HashMap"/>
+<fullyQualifiedTypeName name="java.lang.StringBuilder"/>
+<fullyQualifiedTypeName name="java.io.File"/>
+<fullyQualifiedTypeName name="com.cas.das.core.util.DocumentProcessing"/>
+<fullyQualifiedTypeName name="java.util.LinkedHashMap"/>
+<fullyQualifiedTypeName name="java.util.Map.Entry"/>
+<fullyQualifiedTypeName name="java.util.Set"/>
+</qualifiedTypeNameHistroy>

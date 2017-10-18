@@ -1,0 +1,382 @@
+package com.cas.das.core.service.processor;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import net.jlrnt.dbc.DataManager;
+
+import org.apache.commons.io.FileUtils;
+
+import com.cas.platform.service.ServiceHandle;
+import com.cas.platform.service.ServiceProcessor;
+import com.cas.platform.service.def.param.TextParam;
+
+/**
+ * 风廓线雷达数据导入。
+ * <p>
+ * 监测文件夹下十进制雷达数据，读取后插入数据库，并按照日期进行分类存储。
+ * </p>
+ * 
+ * @author xiang_wang
+ */
+public class WindLidarDataProcessor extends ServiceProcessor {
+
+	private static final String FILE_SEPARATOR = System.getProperty("file.separator");
+
+	@Override
+	public void process(ServiceHandle handle, Object argument) {
+		// 读取所需参数
+		DataManager dataManager = (DataManager) handle.getAttribute("dataManager");
+		String siteId = ((TextParam) handle.getProcessorOuterParam("siteId")).getValue();
+		String tableName = ((TextParam) handle.getProcessorOuterParam("tableName")).getValue();
+		String jsonDir = ((TextParam) handle.getServiceTypeParam("jsonDir")).getValue();
+		File directory = (File) handle.getAttribute("directory");
+		Map<String, String> factorMap = getAllFactorColumnMap(dataManager);
+		// 遍历所有文件，读取记录信息并导入数据库，把读取后的记录文件按照时间分类存放
+		File[] files = directory.listFiles();
+		for (int i = 0; i < files.length; i++) {
+
+			File file = files[i];
+			// 文件夹跳过
+			if (file.isDirectory()) {
+				continue;
+			}
+			// 解析文件入库并移动文件
+			try {
+				parseLidarData(dataManager, file, siteId, factorMap,tableName,jsonDir);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * 解析文件入库并移动文件
+	 */
+	@SuppressWarnings({"rawtypes", "unchecked" })
+	public void parseLidarData(DataManager dm, File childFile, String siteId, Map<String, String> factorMap,String tableName,
+			String jsonDir) throws Exception {
+		String encoding = "GBK";
+		String mtTime = null;
+		if (childFile.exists()&&childFile.isFile()) { // 判断文件是否存在
+
+			System.out.println("Start to parse lidar file- siteId:" + siteId + ",fileName:" + childFile.getName());
+
+			InputStreamReader read = new InputStreamReader(new FileInputStream(childFile), encoding);// 考虑到编码格式
+			BufferedReader bufferedReader = new BufferedReader(read);
+			String lineTxt = null;
+			int lineNum = 0;
+			//定义集合存放不同高度
+			List<List<String>> heightList = new ArrayList<List<String>>();
+			//定义集合存放不同高度的值
+			List<List<String>> heightValueList = new ArrayList<List<String>>();
+			Map<String, Object> sqlItemMap = new HashMap<String, Object>();
+			sqlItemMap.put("siteId", siteId);
+			sqlItemMap.put("mt", "'LIDAR_WIND'");
+			Date date = null;
+			while ((lineTxt = bufferedReader.readLine()) != null) {
+				lineNum++;
+
+				if (lineNum == 2) {
+					// 获取json数据高度值
+					String[] content = lineTxt.split(",");
+					//转化为list
+					List<String> list = Arrays.asList(content);
+					List<List<String>> subList = new ArrayList<List<String>>();
+					//按照高度对集合进行分组
+					for (int i = 0; i < content.length/10; i++) {
+						subList.add(list.subList(4+(i*10),4+(i*10)+10));
+					}
+					//去除两个不需要的字段的高度值
+					for (Iterator<List<String>> iter = subList.iterator(); iter.hasNext();) {
+						List<String> list2 = new ArrayList<String>((List<String>) iter.next());
+						list2.remove(3);
+						List l = new ArrayList<String>(list2);
+						l.remove(7);
+						List li = new ArrayList<String>(l);
+						heightList.add(li);
+			        }
+				} else if (lineNum == 3) {
+					//获取文件记录时间和json数据值
+					String[] content = lineTxt.split(",");
+					
+					String monitorTime = content[0];
+					date = new SimpleDateFormat("yyyyMMdd HH:mm:ss").parse(monitorTime);
+					Calendar now = Calendar.getInstance();
+					now.setTime(date);
+					sqlItemMap.put("year", now.get(Calendar.YEAR) + 1);
+					sqlItemMap.put("month", (now.get(Calendar.MONTH)));
+					sqlItemMap.put("day", now.get(Calendar.DAY_OF_MONTH));
+					sqlItemMap.put("hour", now.get(Calendar.HOUR_OF_DAY));
+					sqlItemMap.put("minute", now.get(Calendar.MINUTE));
+					sqlItemMap.put("second", now.get(Calendar.SECOND));
+
+					mtTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now.getTime());
+					sqlItemMap.put("datatime", "'" + mtTime + "'");
+					
+					//转化为list
+					List<String> list = Arrays.asList(content);
+					List<List<String>> subList = new ArrayList<List<String>>();
+					//按照高度对集合进行分组
+					for (int i = 0; i < content.length/10; i++) {
+						subList.add(list.subList(4+(i*10),4+(i*10)+10));
+					}
+					//把不同高度的值加入集合中，去除两个不需要的字段的值
+					for (Iterator<List<String>> iter = subList.iterator(); iter.hasNext();) {
+						List<String> list2 = new ArrayList<String>((List<String>) iter.next());
+						list2.remove(3);
+						List l = new ArrayList<String>(list2);
+						l.remove(7);
+						List li = new ArrayList<String>(l);
+						heightValueList.add(li);
+			        }
+				}
+			}
+
+			// 拼接SQL
+			String insertSql = parseSql(sqlItemMap, heightList, factorMap, heightValueList,tableName,jsonDir,date);
+			//dm.executeUpdate(insertSql);
+			read.close();
+		}
+		moveFile(childFile, mtTime);
+	}
+
+	private String parseSql(Map<String, Object> sqlItemMap,List<List<String>> heightList, Map<String, String> factorMap,
+			List<List<String>> heightValueList ,String tableName,String jsonDir,Date date) {
+
+		StringBuilder insertSb = new StringBuilder();
+		insertSb.append("insert into "+tableName+" (");
+		StringBuilder valSb = new StringBuilder();
+		valSb.append(" VALUES (");
+
+		// 拼接基本信息
+		for (String key : sqlItemMap.keySet()) {
+			insertSb.append(key).append(",");
+			valSb.append(sqlItemMap.get(key)).append(",");
+		}
+		Set<String> keys = factorMap.keySet();
+		for (String key : keys ) {
+			String factorColumn = factorMap.get(key);
+			if (factorColumn != null) {
+				insertSb.append("f").append(factorColumn).append(",");
+				//valSb.append("'").append(jsonValue).append("',");
+			}
+		}
+		List<String> jsons = getJson(heightList, heightValueList);
+		StringBuilder text = new StringBuilder("{\"type\":\"012\",\"content\":{");
+		int i = 1;
+		for (String string : jsons) {
+			text.append("\"200").append(i).append("\":").append(string).append(",");
+			valSb.append("'").append(string).append("',");
+			i++;
+		}
+		//TODO
+		text.deleteCharAt(text.length()-1).append("}}");
+		String jsonDate = new SimpleDateFormat("yyyyMMddHHmmss").format(date);
+		String jsonFile = jsonDir+"\\LIDAR_WIND-"+jsonDate+".txt";
+		File file = new File(jsonFile);
+		createParentDir(file);
+		try {
+			createFile(file);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		writeFile(file,text.toString());
+		// 拼接高度相关信息
+
+		insertSb.append("createTs,updateTs)");
+		valSb.append("GETDATE(),GETDATE())");
+
+		return insertSb.toString() + valSb.toString();
+	}
+
+	private List<String> getJson(List<List<String>> heightList,List<List<String>> heightValueList){
+		StringBuilder WindSpeed = new StringBuilder("{");
+		StringBuilder WindDirection = new StringBuilder("{");
+		StringBuilder MaxWindSpeed = new StringBuilder("{");
+		StringBuilder MinWindSpeed = new StringBuilder("{");
+		StringBuilder Zwind = new StringBuilder("{");
+		StringBuilder StdDev = new StringBuilder("{");
+		StringBuilder MeanSNR = new StringBuilder("{");
+		StringBuilder WindShear = new StringBuilder("{");
+		List<String> jsons = new ArrayList<String>();
+		for (int i = 0; i < heightList.size(); i++) {
+			List<String> heights = heightList.get(i);
+			List<String> values = heightValueList.get(i);
+			for (int j = 0; j < heights.size() ; j++) {
+				float h = Float.parseFloat(heights.get(j).split("m ")[0])/1000;
+				switch (j) {
+				case 0:
+					WindSpeed.append("\"").append(h).append("\":\"").append(values.get(j)).append("\",");
+					break;
+				case 1:
+					WindDirection.append("\"").append(h).append("\":\"").append(values.get(j)).append("\",");
+					break;
+				case 2:
+					MaxWindSpeed.append("\"").append(h).append("\":\"").append(values.get(j)).append("\",");
+					break;
+				case 3:
+					MinWindSpeed.append("\"").append(h).append("\":\"").append(values.get(j)).append("\",");
+					break;
+				case 4:
+					Zwind.append("\"").append(h).append("\":\"").append(values.get(j)).append("\",");
+					break;
+				case 5:
+					StdDev.append("\"").append(h).append("\":\"").append(values.get(j)).append("\",");
+					break;
+				case 6:
+					MeanSNR.append("\"").append(h).append("\":\"").append(values.get(j)).append("\",");
+					break;
+				case 7:
+					WindShear.append("\"").append(h).append("\":\"").append(values.get(j)).append("\",");
+					break;
+				default:
+					break;
+				}
+			}
+		}
+		WindSpeed.deleteCharAt(WindSpeed.length()-1).append("}");
+		WindDirection.deleteCharAt(WindDirection.length()-1).append("}");
+		MaxWindSpeed.deleteCharAt(MaxWindSpeed.length()-1).append("}");
+		MinWindSpeed.deleteCharAt(MinWindSpeed.length()-1).append("}");
+		Zwind.deleteCharAt(Zwind.length()-1).append("}");
+		StdDev.deleteCharAt(StdDev.length()-1).append("}");
+		MeanSNR.deleteCharAt(MeanSNR.length()-1).append("}");
+		WindShear.deleteCharAt(WindShear.length()-1).append("}");
+		jsons.add(WindSpeed.toString());
+		jsons.add(WindDirection.toString());
+		jsons.add(MaxWindSpeed.toString());
+		jsons.add(MinWindSpeed.toString());
+		jsons.add(Zwind.toString());
+		jsons.add(StdDev.toString());
+		jsons.add(MeanSNR.toString());
+		jsons.add(WindShear.toString());
+		return jsons;
+	}
+
+	/**
+	 * 移动文件到新的目录。
+	 * <p>
+	 * 移动到对应日期的文件夹下<br/>
+	 * mtTime:yyyy-MM-dd HH:mm:ss
+	 * </p>
+	 */
+	private void moveFile(File srcFile, String mtTime) {
+
+		if (mtTime.length() < 19) {
+			return;
+		}
+		String year = mtTime.substring(0, 4);
+		String month = mtTime.substring(5, 7);
+		String day = mtTime.substring(8, 10);
+
+		String destFilePath = srcFile.getParent();
+		destFilePath += FILE_SEPARATOR + year;
+		destFilePath += FILE_SEPARATOR + year + month;
+		destFilePath += FILE_SEPARATOR + year + month + day;
+		destFilePath += FILE_SEPARATOR + srcFile.getName();
+
+		File destFile = new File(destFilePath);
+		createParentDir(destFile);
+		try {
+			FileUtils.moveFile(srcFile, destFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	// 创建父目录
+	private void createParentDir(File file) {
+		if (!file.getParentFile().exists()) {
+			createParentDir(file.getParentFile());
+			file.getParentFile().mkdir();
+		}
+	}
+
+	/**
+	 * 获取监测因子和列对应关系
+	 * 
+	 * @param dm
+	 * @return
+	 */
+	private Map<String, String> getAllFactorColumnMap(DataManager dm) {
+
+		Map<String, String> result = new LinkedHashMap<String, String>();
+
+		result.put("WindSpeed", "001");
+		result.put("WindDirection", "002");
+		result.put("Max WindSpeed", "003");
+		result.put("Min WindSpeed", "004");
+		result.put("Zwind", "005");
+		result.put("StdDev", "006");
+		result.put("MeanSNR(dB)", "007");
+		result.put("WindShear", "008");
+		return result;
+	}
+	
+	/**
+	 * 创建文件
+	 * 
+	 * @param fileName
+	 * @return
+	 */
+	public static boolean createFile(File fileName) throws Exception {
+		boolean flag = false;
+		try {
+			if (!fileName.exists()) {
+				fileName.createNewFile();
+				flag = true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return flag;
+	}
+	
+	public static void writeFile(File file, String data) {
+		FileOutputStream fop = null;
+		try {
+			fop = new FileOutputStream(file);
+
+			// if file doesnt exists, then create it
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+
+			// get the content in bytes
+			byte[] contentInBytes = data.getBytes("UTF-8");
+
+			fop.write(contentInBytes);
+			fop.flush();
+			fop.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (fop != null) {
+					fop.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+}

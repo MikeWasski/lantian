@@ -1,0 +1,27 @@
+package com.cas.das.core.entity;
+
+import java.io.UnsupportedEncodingException;
+
+import com.cas.das.core.util.CodeCheckUtil;
+import com.cas.das.core.util.DataTransmission;
+
+/*
+ * 数据回补响应生成实体类
+ **/
+
+public class ResponseProtocol implements DataTransmission {
+	private String dataType;//数据类型
+	private String siteCode;//子站边号
+	private String dataTime;//数据时标
+	private String dataLength;//数据长度
+	private String headDelimiter;//头部分隔符
+	private String data;//数据部分
+	private String tailDelimiter;//尾部分隔符
+	private String checkValue;//校验值
+	private String terminator;//结束符
+
+	@Override
+	public byte[] getDataPacket() {
+		return null;
+	}
+}

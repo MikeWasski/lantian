@@ -1,0 +1,5 @@
+#Tomcat publish data
+#Tue Oct 17 15:35:16 CST 2017
+org.eclipse.jst.jee.server\:/binary\:E\:\\workspaces\\rdnw_lantian_used\\cas-components\\spring\\spring-web-4.1.6.RELEASE.jar=D\:\\apache-tomcat-7.0.78\\webapps\\das-web\\WEB-INF\\lib\\spring-web-4.1.6.RELEASE.jar
+org.eclipse.jst.j2ee.server\:das-core=D\:\\apache-tomcat-7.0.78\\webapps\\das-web\\WEB-INF\\lib\\das-core.jar
+org.eclipse.jst.jee.server\:das-web=D\:\\apache-tomcat-7.0.78\\webapps\\das-web

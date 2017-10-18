@@ -1,0 +1,47 @@
+package com.cas.das.core.entity;
+
+import java.io.UnsupportedEncodingException;
+
+import com.cas.das.core.util.DataTransmission;
+
+public class ResponseProtocol implements DataTransmission {
+	/*
+	 * 数据回补响应生成实体类
+	 * 
+	 **/
+	
+	private String requestStr;//请求字符串
+	
+	public String getRequestStr() {
+		return requestStr;
+	}
+
+	public void setRequestStr(String requestStr) {
+		this.requestStr = requestStr;
+	}
+
+	@Override
+	public byte[] getDataPacket() {
+		 String[] requests = requestStr.split("tek");
+		 String checkStr = requests[0].substring(0,requests[0].length()-2)+"tek";
+		 String result = checkStr + getValue(checkStr) + "####";
+		return null;
+	}
+	
+	// 获取异或值校验码
+	public String getValue(String dataPacket) {
+		byte byt = 0x00;
+		try {
+			for (byte b : dataPacket.getBytes("GB2312")) {
+				byt ^= b;
+			}
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		// 校验码部分
+		String check = 2 > ("" + byt).length() ? ("0" + byt) : ("" + byt);
+		return check;
+
+	}
+
+}

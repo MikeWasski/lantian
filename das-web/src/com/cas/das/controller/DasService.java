@@ -1,0 +1,339 @@
+package com.cas.das.controller;
+
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import net.jlrnt.web.custom.Result;
+import net.jlrnt.web.util.ServletUtils;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.cas.das.core.DasServiceContext;
+import com.cas.das.core.base.BaseController;
+import com.cas.platform.service.Service;
+import com.cas.platform.service.ServiceContext;
+import com.cas.platform.service.ServiceProcessor;
+import com.cas.platform.service.ServiceType;
+import com.cas.platform.service.def.ParamDefinition;
+
+/**
+ * 服务控制器
+ * 
+ * @author NiuLei
+ */
+@Controller
+@RequestMapping("/service")
+public class DasService extends BaseController {
+
+	/**
+	 * 服务列表页
+	 * 
+	 * @return
+	 */
+	@RequestMapping(value = "list", method = RequestMethod.GET)
+	public String list(HttpServletRequest request) {
+		return "/service/list";
+	}
+
+	/**
+	 * 读取所有服务
+	 * 
+	 * @return
+	 */
+	@RequestMapping(value = "/async/loadList", method = RequestMethod.POST)
+	@ResponseBody
+	public Service[] loadList(HttpServletRequest request) {
+		return DasServiceContext.getContext().getServices();
+	}
+
+	/**
+	 * 根据服务编码读取服务
+	 * 
+	 * @return
+	 */
+	@RequestMapping(value = "/async/load", method = RequestMethod.POST)
+	@ResponseBody
+	public Result load(HttpServletRequest request) {
+		Result result = new Result();
+
+		String code = ServletUtils.getParamToNull(request, "code");
+		if (null == code) {
+			result.setMessage("错误：服务编码不能为空");
+			result.abNormal();
+			return result;
+		}
+
+		Service accessService = DasServiceContext.getContext().getService(code);
+		if (null == accessService) {
+			result.setMessage("错误：找不到接入服务");
+			result.abNormal();
+			return result;
+		}
+
+		result.setResultObj(accessService);
+		return result;
+	}
+
+	/**
+	 * 启动服务
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/async/startup", method = RequestMethod.POST)
+	@ResponseBody
+	public Result startup(HttpServletRequest request) {
+		Result result = new Result();
+
+		String code = ServletUtils.getParamToNull(request, "code");
+		if (null == code) {
+			result.setMessage("错误：服务编码不能为空");
+			result.abNormal();
+			return result;
+		}
+
+		Service accessService = DasServiceContext.getContext().getService(code);
+		if (null == accessService) {
+			result.setMessage("错误：找不到接入服务");
+			result.abNormal();
+			return result;
+		}
+
+		if (accessService.isRun()) {
+			result.setMessage("错误：操作发生异常，请检查服务状态");
+			result.abNormal();
+			return result;
+		}
+
+		try {
+			boolean v = accessService.startup();
+			if (!v) {
+				result.setMessage("错误：启动服务失败");
+				result.abNormal();
+				return result;
+			}
+		} catch (Exception e) {
+			result.setMessage("错误：启动服务时发生异常");
+			result.abNormal();
+			return result;
+		}
+
+		return result;
+	}
+
+	/**
+	 * 停止服务
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/async/shutdown", method = RequestMethod.POST)
+	@ResponseBody
+	public Result shutdown(HttpServletRequest request) {
+		Result result = new Result();
+
+		String code = ServletUtils.getParamToNull(request, "code");
+		if (null == code) {
+			result.setMessage("错误：服务编码不能为空");
+			result.abNormal();
+			return result;
+		}
+
+		Service accessService = DasServiceContext.getContext().getService(code);
+		if (null == accessService) {
+			result.setMessage("错误：找不到接入服务");
+			result.abNormal();
+			return result;
+		}
+
+		if (!accessService.isRun()) {
+			result.setMessage("错误：操作发生异常，请检查服务状态");
+			result.abNormal();
+			return result;
+		}
+
+		try {
+			boolean v = accessService.shutdown();
+			if (!v) {
+				result.setMessage("错误：停止服务失败");
+				result.abNormal();
+				return result;
+			}
+		} catch (Exception e) {
+			result.setMessage("错误：停止服务时发生异常");
+			result.abNormal();
+			return result;
+		}
+
+		return result;
+	}
+
+	/**
+	 * 保存服务
+	 * 
+	 * @return
+	 */
+	@RequestMapping(value = "/async/save", method = RequestMethod.POST)
+	@ResponseBody
+	public Result save(HttpServletRequest request) {
+		Result result = new Result();
+
+		ServiceContext serviceContext = DasServiceContext.getContext(); // 数据接入上下文;
+
+		// 修改前的服务编码;
+		String updateServiceCode = ServletUtils.getParamToNull(request, "updateServiceCode");
+
+		// 服务编码;
+		String serviceCode = ServletUtils.getParamToNull(request, "serviceCode");
+		if (null == serviceCode) {
+			result.setMessage("错误：服务编码不能为空");
+			result.abNormal();
+			return result;
+		}
+
+		if (!serviceCode.equals(updateServiceCode)) {
+			Service existService = serviceContext.getService(serviceCode);
+			if (null != existService) {
+				result.setMessage("错误：服务编码已存在");
+				result.abNormal();
+				return result;
+			}
+		}
+
+		// 服务名称;
+		String serviceName = ServletUtils.getParamToNull(request, "serviceName");
+		if (null == serviceName) {
+			result.setMessage("错误：服务名称不能为空");
+			result.abNormal();
+			return result;
+		}
+
+		// 是否随系统自动启动;
+		String autoStartup = ServletUtils.getParamToNull(request, "autoStartup");
+
+		// 服务类型码;
+		String serviceTypeCode = ServletUtils.getParamTrimToNull(request, "serviceTypeCode");
+		if (null == serviceTypeCode) {
+			result.setMessage("错误：服务类型码不能为空");
+			result.abNormal();
+			return result;
+		}
+
+		ServiceType accessServiceType = serviceContext.getServiceType(serviceTypeCode);
+		if (null == accessServiceType) {
+			result.setMessage("错误：无法获取相应的服务类型");
+			result.abNormal();
+			return result;
+		}
+
+		// 前台已经验证，这里代码进行注释
+		/*ParamDefinition[] typeDefinitions = accessServiceType.getParamDefinitions(); // 接入服务类型参数定义;
+		for (int i = 0; i < typeDefinitions.length; i++) {
+			ParamDefinition typeDef = typeDefinitions[i];
+			String typeDefParamValue = ServletUtils.getParamTrimToNull(request, typeDef.getCode() + "-" + serviceTypeCode);
+			if (null == typeDefParamValue) {
+				result.setMessage("错误：" + accessServiceType.getName() + "中的" + typeDef.getName() + "不能为空");
+				result.abNormal();
+				return result;
+			}
+		}*/
+
+		// 处理器编码;
+		String processorCode = ServletUtils.getParamToNull(request, "processorCode");
+		if (null == processorCode) {
+			result.setMessage("错误：处理器编码不能为空");
+			result.abNormal();
+			return result;
+		}
+
+		// 服务处理器;
+		ServiceProcessor serviceProcessor = serviceContext.getServiceProcessor(processorCode);
+		if (null == serviceProcessor) {
+			result.setMessage("错误：无法获取相应的处理器");
+			result.abNormal();
+			return result;
+		}
+
+		Map<String, String[]> paramMap = ServletUtils.getRequestParamMap(request); // 请求参数表;
+
+		// 新建接入服务;
+		Service accessService = null;
+		try {
+			accessService = new Service(serviceCode, serviceName, "1".equals(autoStartup), accessServiceType, serviceProcessor, paramMap);
+		} catch (Exception e) {
+			result.setMessage("错误：无法创建接入服务");
+			result.abNormal();
+			return result;
+		}
+
+		if (null != updateServiceCode) {
+			Service updateService = serviceContext.getService(updateServiceCode);
+			if (null == updateService) {
+				result.setMessage("错误：找不到被修改的服务");
+				result.abNormal();
+				return result;
+			}
+
+			serviceContext.removeAndSaveService(updateService);
+
+			boolean addServiceResult = serviceContext.addAndSaveService(accessService);
+
+			if (!addServiceResult) {
+				serviceContext.addAndSaveService(updateService);
+				result.setMessage("错误：无法加入并保存接入服务");
+				result.abNormal();
+				return result;
+			}
+		} else {
+			boolean addServiceResult = serviceContext.addAndSaveService(accessService);
+
+			if (!addServiceResult) {
+				result.setMessage("错误：无法加入并保存接入服务");
+				result.abNormal();
+				return result;
+			}
+		}
+
+		result.setMessage("保存服务成功");
+		return result;
+	}
+
+	/**
+	 * 删除服务
+	 * 
+	 * @return
+	 */
+	@RequestMapping(value = "/async/remove", method = RequestMethod.POST)
+	@ResponseBody
+	public Result remove(HttpServletRequest request) {
+		Result result = new Result();
+
+		String code = ServletUtils.getParamToNull(request, "code");
+		if (null == code) {
+			result.setMessage("错误：服务编码不能为空");
+			result.abNormal();
+			return result;
+		}
+
+		Service accessService = DasServiceContext.getContext().getService(code);
+		if (null == accessService) {
+			result.setMessage("错误：找不到接入服务");
+			result.abNormal();
+			return result;
+		}
+
+		boolean removeServiceResult = DasServiceContext.getContext().removeAndSaveService(accessService);
+		if (!removeServiceResult) {
+			result.setMessage("错误：无法删除服务");
+			result.abNormal();
+			return result;
+		}
+
+		return result;
+	}
+
+}

@@ -1,0 +1,54 @@
+package com.cas.das.core.entity;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import com.cas.das.core.util.DataTransmission;
+
+/*
+ * 心跳生成实体类
+ **/
+
+public class Heartbeat implements DataTransmission {
+	private String dataType;// 数据类型
+	private String siteCode;// 子站编号
+	private String dataTime;// 数据时标
+	private String terminator;// 结束符
+
+	public String getDataType() {
+		return dataType;
+	}
+
+	public void setDataType(String dataType) {
+		this.dataType = dataType;
+	}
+
+	public String getSiteCode() {
+		return siteCode;
+	}
+
+	public void setSiteCode(String siteCode) {
+		this.siteCode = siteCode;
+	}
+
+	public String getTerminator() {
+		return terminator;
+	}
+
+	public void setTerminator(String terminator) {
+		this.terminator = terminator;
+	}
+
+	@Override
+	public byte[] getDataPacket() {
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date date = new Date();
+		String formatdate = format.format(date);
+		dataTime = formatdate;
+		String heartbeat = dataType + siteCode + dataTime + terminator;
+		byte[] by = null;
+		by = heartbeat.getBytes("GB2312");
+		return by;
+	}
+
+}

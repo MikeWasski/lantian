@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<decorators defaultdir="/WEB-INF/view/decorators">
+
+	<excludes>
+		<pattern>/*/async/*.html</pattern>
+		<pattern>/*/resource/*.html</pattern>
+	</excludes>
+
+	<decorator name="layout_simple" page="layoutSimple.jsp">
+		<pattern>/login/*.html</pattern>
+	</decorator>
+
+	<decorator name="layout_ns" page="layoutNS.jsp">
+		<pattern>/*.html</pattern>
+	</decorator>
+
+</decorators>

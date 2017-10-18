@@ -1,0 +1,95 @@
+package net.gong.com;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.concurrent.LinkedBlockingQueue;
+
+public class TestMain {
+
+
+	public static void main(String[] args) {
+		
+		
+		/*String str = "JC0740010012017-05-10 00:00:0000c4@@@504b03041400080808006587314b00000000000000000000000001000000300bf637d231d0333432d4b1f603330d2ccd75ac9dfd412c53531d6b7f6390b481918e75b88b8e859e25900ed63134d0030a0000504b0708278edb79330000003b000000tek34####";
+		String str2 = "JC0940010012013-03-27 22:00:000033@@@JZ12|SO2|2013-03-27 22:01:002013-03-27 23:01:00|1|1tek20####";
+		String str3 = "JC0940010012013-03-27 22:00:000033@@@JZ12|SO2|2013-03-27 22:01:002013-03-27 23:01:00|1|1tek";
+		System.out.println(checksumXOR(str2));*/
+	}
+
+	public static void get() {
+		// 创建一个URL对象
+		URL url = null;
+		try {
+			url = new URL(
+					"http://192.168.1.101:8001/service/radar?keystring=98F54E223F0A248B6303CC9F6E33FF21232F297A57A5A743894AE4A801FC344c2bcac85c54133a64ec05688b77be6&mtType=013&stationId=1100000003&startTime=2017-09-25%2000%3A00&endTime=2017-10-12%2000%3A00&factors=3021");
+			// url = new
+			// URL("http://192.168.1.101:8001/api/Login?UserCode=admin&pwd=1234567");
+			// openStream():把指定URL的资源读取到本地
+			InputStream is = url.openStream();
+			byte[] b = new byte[1024];
+			int len;
+			while ((len = is.read(b)) != -1) {
+				String s = new String(b, 0, len, "UTF-8");
+				System.out.println(s);
+			}
+			is.close();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+
+	//校验长度
+	public static boolean checksumLength(String str){
+		String[] substr = str.split("@@@");
+		String length = substr[0].substring(substr[0].length()-4,substr[0].length());
+		String length2 = lengthFormat(substr[1].split("tek")[0].length());
+		return length.equals(length2) ? true : false;
+		
+	}
+	
+	// 十进制数转十六进制，长度保持4字符
+	public static String lengthFormat(int length) {
+		String strs = Integer.toHexString(length);
+		String s = "";
+		if (4 > strs.length()) {
+			for (int i = 0; i < (4 - strs.length()); i++) {
+				s += "0";
+			}
+		}
+		return s + strs;
+	}
+	
+	//校验异或码
+	public static boolean checksumXOR(String str){
+		if(null == str){
+			return false;
+		}
+		String substr = str.substring(0,str.length()-6);
+		String code = str.split("tek")[1].substring(0,2);
+		String sode2 = getCode(substr);
+		return code.equals(sode2) ? true : false;
+	}
+
+	// 获取异或值校验码
+	public static String getCode(String dataPacket) {
+		byte byt = 0x00;
+		try {
+			for (byte b : dataPacket.getBytes("GB2312")) {
+				byt ^= b;
+			}
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		// 校验码部分
+		String check = 2 > ("" + byt).length() ? ("0" + byt) : ("" + byt);
+		return check;
+
+	}
+}

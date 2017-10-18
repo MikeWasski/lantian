@@ -1,0 +1,174 @@
+package com.cas.das.core.util;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.zip.GZIPOutputStream;
+
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
+
+public class CodeCheckUtil {
+	public static void main(String[] args) {
+		/*String str = "JC0940010012013-03-27 22:00:00@@@JZ12|SO2|2013-03-27 22:01:002013-03-27 23:01:00|1|1tek20####";
+		String str2 = "JC0940010012013-03-27 22:00:000033@@@JZ12|SO2|2013-03-27 22:01:002013-03-27 23:01:00|1tek89####";
+		System.out.println(checksumXOR(str2));*/
+	}
+	
+	/**
+	 * 对字节数组按照65535字节一个进行分组
+	 * 
+	 * */ 
+	public static List<byte[]> toSubcontract(byte[] zip) {
+		List<byte[]> lists = new ArrayList<byte[]>();
+		double dou = 65535d;
+		int num = (int) Math.ceil((double) zip.length / dou);
+		for (int i = 0; i < num; i++) {
+			if (i != num - 1) {
+				byte[] sb = subBytes(zip, (int) (i * dou), (int) dou);
+				lists.add(sb);
+
+			} else {
+				byte[] sb = subBytes(zip, (int) (i * dou), (int) (zip.length - (i * dou)));
+				lists.add(sb);
+			}
+		}
+		return lists;
+
+	}
+	
+	/**
+	 *src:原始数组 begin:起始位置 count:要截取的长度
+	 * 
+	 * */
+	public static byte[] subBytes(byte[] src, int begin, int count) {
+		byte[] bs = new byte[count];
+		System.arraycopy(src, begin, bs, 0, count);
+		return bs;
+	}
+	
+	public static byte[] compress(byte srcBytes[]) throws Exception {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		BZip2CompressorOutputStream bcos = new BZip2CompressorOutputStream(out);
+		bcos.write(srcBytes);
+		bcos.close();
+		return out.toByteArray();
+	}
+	
+	public static String gzip(String primStr) throws Exception {
+		if (primStr == null || primStr.length() == 0) {
+			return primStr;
+		}
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+		GZIPOutputStream gzip = null;
+		try {
+			gzip = new GZIPOutputStream(out);
+			gzip.write(primStr.getBytes());
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (gzip != null) {
+				try {
+					gzip.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		//return new sun.misc.BASE64Encoder().encode(out.toByteArray());
+		return new String(out.toByteArray(),"UTF-8");
+	}
+	
+	/**
+	 * 输入完整请求字符串校验数据部分长度
+	 * */
+	public static boolean checksumLength(String str) {
+		String[] substr = str.split("@@@");
+		String length = substr[0].substring(substr[0].length() - 4, substr[0].length());
+		String length2 = lengthFormat(substr[1].split("tek")[0].length());
+		return length.equals(length2) ? true : false;
+
+	}
+	
+	/**
+	 * 十进制数转十六进制，长度固定4字符
+	 * */
+	public static String lengthFormat(int length) {
+		String strs = Integer.toHexString(length);
+		String s = "";
+		if (4 > strs.length()) {
+			for (int i = 0; i < (4 - strs.length()); i++) {
+				s += "0";
+			}
+		}else if(4 < strs.length()){
+			return "FFFF";
+		}
+		return s + strs;
+	}
+	
+	/**
+	 * 输入完整请求字符串校校验异或码
+	 * */
+	public static boolean checksumXOR(String str) {
+		if (null == str) {
+			return false;
+		}
+		String substr = str.substring(0, str.length() - 6);
+		String code = str.split("tek")[1].substring(0, 2);
+		String sode2 = getCode(substr);
+		return code.equals(sode2) ? true : false;
+	}
+	
+	/**
+	 * 异或值校验码
+	 * */
+	public static String getCode(String dataPacket) {
+		byte byt = 0x00;
+		try {
+			for (byte b : dataPacket.getBytes("GB2312")) {
+				byt ^= b;
+			}
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		// 校验码部分
+		String check = toHex(byt);
+		return check;
+
+	}
+	
+	/**
+	 * 异或值校验码
+	 * */
+	public static String getCode(byte[] dataPacket) {
+		byte byt = 0x00;
+		for (byte b : dataPacket) {
+			byt ^= b;
+		}
+		// 校验码部分
+		String check = toHex(byt);
+		return check;
+
+	}
+	
+	// 把byte 转化为两位十六进制数
+	public static String toHex(byte b) {
+		String result = Integer.toHexString(b & 0xFF);
+		if (result.length() == 1) {
+			result = '0' + result;
+		}
+		return result;
+	}
+	
+	// 把int 转化为两位十六进制数
+	public static String toHex(int b) {
+		String result = Integer.toHexString(b);
+		if (result.length() == 1) {
+			result = '0' + result;
+		}
+		return result;
+	}
+}

@@ -1,0 +1,125 @@
+package com.cas.das.core.entity;
+
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
+
+import com.cas.das.core.util.CodeCheckUtil;
+import com.cas.das.core.util.DataTransmission;
+import com.cas.das.core.util.DocumentProcessing;
+
+/**
+ * 文件目录监视器，监视指定目录，创建数据包生成类并写入队列
+ * */
+
+public class FileDirectoryMonitor implements Runnable {
+	private LinkedBlockingQueue<DataTransmission> queue;
+	private String monitorDir;
+	private String siteCode;
+	private String intervalTime;
+	private boolean type;
+
+	public FileDirectoryMonitor(LinkedBlockingQueue<DataTransmission> queue,
+			String monitorDir, String siteCode, String intervalTime,
+			boolean type) {
+		this.queue = queue;
+		this.monitorDir = monitorDir;
+		this.siteCode = siteCode;
+		this.intervalTime = intervalTime;
+		this.type = type;
+	}
+
+	@Override
+	public void run() {
+		while (type) {
+			try {
+				Map<String, String> map = DocumentProcessing
+						.readFile(monitorDir);
+				Set<String> keys = map.keySet();
+				SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
+				SimpleDateFormat format1 = new SimpleDateFormat(
+						"yyyy-MM-dd HH:mm:ss");
+				if (keys.size() != 0) {
+					for (String key : keys) {
+						if (key.startsWith("JC0")) {
+							String dataType = key.split("-")[0];
+							String datestring = key.split("-")[1];
+							Date date = null;
+							try {
+								date = format.parse(datestring);
+							} catch (ParseException e) {
+								e.printStackTrace();
+							}
+							String datestr = format1.format(date);
+							// 得到要发送的数据字符串
+							String value = map.get(key);
+							InstrumentStatus InstrumentStatus = new InstrumentStatus();
+							InstrumentStatus.setDataType(dataType);
+							InstrumentStatus.setSiteCode(siteCode);
+							InstrumentStatus.setDataTime(datestr);
+							InstrumentStatus.setHeadDelimiter("@@@");
+							InstrumentStatus.setData(value);
+							InstrumentStatus.setTailDelimiter("tek");
+							InstrumentStatus.setCheckValue();
+							InstrumentStatus.setTerminator("####");
+							queue.put(InstrumentStatus);
+
+						} else {
+							String mt = key.split("-")[0];
+							String datestring = key.split("-")[1];
+							Date date = null;
+							try {
+								date = format.parse(datestring);
+							} catch (ParseException e) {
+								e.printStackTrace();
+							}
+							String datestr = format1.format(date);
+							// 得到要发送的数据字符串
+							String value = map.get(key);
+							byte[] zip = null;
+							try {
+								// 对字符串进行压缩
+								zip = CodeCheckUtil.compress(value
+										.getBytes("GB2312"));
+							} catch (UnsupportedEncodingException e1) {
+								e1.printStackTrace();
+							} catch (Exception e1) {
+								e1.printStackTrace();
+							}
+							// 得到压缩和分包后的数据字符串
+							List<byte[]> zips = CodeCheckUtil
+									.toSubcontract(zip);
+
+							for (int i = 0; i < zips.size(); i++) {
+								DataTransmissionProtocol protocol = new DataTransmissionProtocol();
+								if ("VOCs".startsWith(mt)) {
+									protocol.setDataType("JZ22");
+								} else {
+									protocol.setDataType("JZ21");
+								}
+								protocol.setSiteCode(siteCode);
+								protocol.setDataTime(datestr);
+								protocol.setTotalPackage(zips.size());
+								protocol.setPacketNumber(i + 1);
+								protocol.setHeadDelimiter("@@@");
+								protocol.setData(zips.get(i));
+								protocol.setTailDelimiter("tek");
+								protocol.setCheckValue();
+								protocol.setTerminator("####");
+								queue.put(protocol);
+							}
+						}
+					}
+				}
+				Thread.sleep(Integer.parseInt(intervalTime) * 1000);
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
+		}
+	}
+}

@@ -1,0 +1,13 @@
+package com.cas.das.core.util;
+
+/*
+ * 数据传输协议接口
+ * 
+ **/
+public interface DataTransmission {
+	/**
+	 * 生成数据包字符串
+	 * 
+	 * */
+	public byte[] getDataPacket();
+}

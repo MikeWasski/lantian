@@ -1,0 +1,3 @@
+.datePic{
+	background:#fff url(time.png) no-repeat right;
+}

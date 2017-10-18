@@ -1,0 +1,52 @@
+package com.cas.das.core.entity;
+
+import java.util.concurrent.LinkedBlockingQueue;
+
+import org.apache.mina.core.session.IoSession;
+
+import com.cas.das.core.util.DataTransmission;
+
+/**
+ * 发送数据包实现类
+ * */
+
+public class MessageSending implements Runnable {
+	private LinkedBlockingQueue<DataTransmission> queue;
+	private IoSession session;
+	private boolean type;
+
+	public MessageSending(LinkedBlockingQueue<DataTransmission> queue,
+			IoSession session,boolean type) {
+		super();
+		this.queue = queue;
+		this.session = session;
+		this.type = type;
+	}
+	
+
+	public boolean isType() {
+		return type;
+	}
+
+
+	public void setType(boolean type) {
+		this.type = type;
+	}
+
+
+	@Override
+	public void run() {
+		while (type) {
+			if (!queue.isEmpty()) {
+				try {
+					String data = queue.take().getDataPacket();
+					//System.out.println("发送数据包:" + data);
+					session.write(data);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+}

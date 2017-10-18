@@ -1,0 +1,92 @@
+package com.cas.das.core.service.type;
+
+import java.net.InetSocketAddress;
+import java.util.concurrent.LinkedBlockingQueue;
+
+import net.jlrnt.dbc.DataManager;
+
+import org.apache.mina.core.future.ConnectFuture;
+import org.apache.mina.core.session.IdleStatus;
+import org.apache.mina.core.session.IoSession;
+import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.apache.mina.transport.socket.nio.NioSocketConnector;
+
+import com.cas.das.core.C3P0DataSource;
+import com.cas.das.core.entity.MessageSending;
+import com.cas.das.core.ftpclient.ClientCodecFactory;
+import com.cas.das.core.ftpclient.MyClientHandler;
+import com.cas.das.core.service.ext.TimedCallMonitor;
+import com.cas.das.core.util.DataTransmission;
+import com.cas.platform.service.ServiceHandle;
+import com.cas.platform.service.ServiceType;
+import com.cas.platform.service.def.param.TextParam;
+
+/**
+ * FTP数据导入
+ * 
+ * @author yushun-gong
+ */
+public class FTPClientImportType extends ServiceType {
+
+	@Override
+	public boolean startupService(ServiceHandle handle) {
+		TextParam intervalTimeParam = (TextParam) handle.getServiceTypeParam("intervalTime");
+		String intervalTime = intervalTimeParam.getValue();
+		try {
+			// 定义数据库链接信息
+			String dbDriver = ((TextParam) handle.getProcessorInnerParam("driverClass")).getValue();
+			String dbUrl = ((TextParam) handle.getProcessorInnerParam("url")).getValue();
+			String dbUsr = ((TextParam) handle.getProcessorInnerParam("user")).getValue();
+			String dbPwd = ((TextParam) handle.getProcessorInnerParam("password")).getValue();
+
+			C3P0DataSource DBSource = C3P0DataSource.build(dbDriver, dbUrl, dbUsr, dbPwd, 1, 1, 10, 1, 2800);
+			DataManager dataManger = new DataManager();
+			dataManger.setLocalSource(DBSource);
+			
+			// 创建一个阻塞队列，存放数据传输协议生成实体类
+			LinkedBlockingQueue<DataTransmission> queue = new LinkedBlockingQueue<DataTransmission>();
+			MyClientHandler myClientHandler = new MyClientHandler(dataManger,queue);
+			IoSession session = clientServer(myClientHandler);
+			handle.setAttribute("queue", queue);
+			// 创建数据发送线程，循环发送队列中的数据
+			MessageSending messageSending = new MessageSending(queue,session);
+			Thread sendThread = new Thread(messageSending);
+			sendThread.start();
+			int millis = Integer.parseInt(intervalTime);
+			TimedCallMonitor monitor = new TimedCallMonitor(handle, millis);
+			monitor.startup();
+			handle.setAttribute("monitor", monitor);
+			
+		} catch (Exception e) {
+			return false;
+		}
+
+		return true;
+	}
+	
+	@Override
+	public boolean shutdownService(ServiceHandle handle) {
+		handle.removeAttribute("queue");
+		TimedCallMonitor monitor = (TimedCallMonitor) handle.getAttribute("monitor");
+		if (null == monitor) {
+			return false;
+		}
+		monitor.shutdown();
+		handle.removeAttribute("monitor");
+		return true;
+	}
+	
+	public IoSession clientServer(MyClientHandler myClientHandler){
+		NioSocketConnector connector = new NioSocketConnector();
+		connector.getFilterChain().addLast("encode", new ProtocolCodecFilter(new ClientCodecFactory("GB2312","UTF-8")));
+		connector.getSessionConfig().setReadBufferSize(2048);
+		connector.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, 10);
+		connector.setConnectTimeoutMillis(30000);
+		connector.setHandler(myClientHandler);
+		ConnectFuture cf = connector.connect(new InetSocketAddress("127.0.0.1", 12347));
+		cf.awaitUninterruptibly();
+		IoSession session = cf.getSession();
+		return session;
+	}
+
+}

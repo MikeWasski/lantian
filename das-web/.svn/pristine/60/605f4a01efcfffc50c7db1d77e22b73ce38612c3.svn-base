@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+
+	<display-name>PAS</display-name>
+
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/spring_config/applicationContext.xml</param-value>
+	</context-param>
+
+	<listener>
+		<listener-class>com.cas.das.web.ContextLoaderListener</listener-class>
+	</listener>
+
+	<filter>
+		<filter-name>FilterController</filter-name>
+		<filter-class>net.jlrnt.web.FilterController</filter-class>
+
+		<init-param>
+			<param-name>uriEncoding</param-name>
+			<param-value>ISO8859-1</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>fixEncoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>mod</param-name>
+			<param-value>
+				net.jlrnt.jst.JstModule
+            </param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>defaultSrc</param-name>
+			<param-value>/index.html</param-value>
+		</init-param>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>FilterController</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<filter>
+		<filter-name>sitemesh</filter-name>
+		<filter-class>com.opensymphony.sitemesh.webapp.SiteMeshFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>sitemesh</filter-name>
+		<url-pattern>*.html</url-pattern>
+	</filter-mapping>
+
+	<servlet>
+		<servlet-name>dispatcherServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/spring_config/dispatcherServlet.xml</param-value>
+		</init-param>
+		<load-on-startup>5</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>dispatcherServlet</servlet-name>
+		<url-pattern>*.html</url-pattern>
+	</servlet-mapping>
+
+</web-app>

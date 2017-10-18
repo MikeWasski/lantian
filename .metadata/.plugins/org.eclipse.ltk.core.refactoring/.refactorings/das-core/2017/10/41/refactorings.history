@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;DataTransmissionProtocol.java&apos; to &apos;das-core/src/com.cas.das.core.entity&apos;&#x0D;&#x0A;- Original project: &apos;das-core&apos;&#x0D;&#x0A;- Destination element: &apos;das-core/src/com.cas.das.core.entity&apos;&#x0D;&#x0A;- Original element: &apos;com.cas.das.core.entity.DataTransmissionProtocol.java&apos;" description="Copy compilation unit" destination="/src&lt;com.cas.das.core.entity" element1="/src&lt;com.cas.das.core.entity{DataTransmissionProtocol.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1507520419898" units="1" version="1.0"/>
+</session>
